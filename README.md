@@ -1,10 +1,14 @@
 # Python Utils
 
----incoming---
+A collection of utility scripts for common file operations and system tasks.
 
 ## Description
 
----incoming---
+This repository contains various Python utility scripts that automate common tasks such as file manipulation, data processing, and system operations. Each script is designed to be self-contained and easy to use.
+
+### Available Scripts
+
+- **trim-filenames.py**: Recursively removes a specified number of characters from the beginning of filenames in a directory and its subdirectories.
 
 ## Requirements
 
@@ -16,4 +20,4 @@
 
 `pip install -r requirements.txt`
 
-`python script.py`
+`python ${script-name}.py`
