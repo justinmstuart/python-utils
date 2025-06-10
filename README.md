@@ -9,6 +9,7 @@ This repository contains various Python utility scripts that automate common tas
 ### Available Scripts
 
 - **trim-filenames.py**: Recursively removes a specified number of characters from the beginning of filenames in a directory and its subdirectories.
+- **mp3-metadata-stripper.py**: Recursively removes metadata from mp3 and m4a files in a directory and its subdirectories.
 
 ## Requirements
 
@@ -20,4 +21,4 @@ This repository contains various Python utility scripts that automate common tas
 
 `pip install -r requirements.txt`
 
-`python ${script-name}.py`
+`python scripts/${script-name}.py`
