@@ -1,6 +1,6 @@
 # Python Utils
 
-This is a collection of Python scripts to automate a variety of tasks.
+This is a collection of Python scripts to automate tasks.
 
 ### Available Scripts
 
