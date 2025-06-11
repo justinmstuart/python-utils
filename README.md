@@ -1,10 +1,6 @@
 # Python Utils
 
-A collection of utility scripts for common file operations and system tasks.
-
-## Description
-
-This repository contains various Python utility scripts that automate common tasks such as file manipulation, data processing, and system operations. Each script is designed to be self-contained and easy to use.
+This is a collection of Python scripts to automate tasks.
 
 ### Available Scripts
 
