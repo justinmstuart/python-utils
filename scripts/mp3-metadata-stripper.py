@@ -17,7 +17,7 @@ import os
 from mutagen.mp3 import MP3
 from mutagen.mp4 import MP4
 from mutagen.id3 import ID3, error
-
+from dotenv import load_dotenv
 
 def create_audio_file(file_path: str) -> MP3 | MP4 | None:
     """
@@ -150,9 +150,34 @@ def remove_metadata_from_audio(directory_path):
         "failed_count": failed_count
     }
 
-if __name__ == "__main__":
+def main():
+    """
+    Main entry point for the audio metadata stripper script.
+
+    This function handles user interaction to gather the directory path,
+    executes the metadata removal operation, and displays results.
+
+    The function will:
+    1. Load environment variables from .env file if it exists
+    2. Check for MP3_METADATA_STRIPPER_DIR environment variable, otherwise prompt for directory
+    3. Execute the metadata removal operation on all MP3 and M4A files
+    4. Display progress messages and final results summary
+
+    Environment Variables:
+        MP3_METADATA_STRIPPER_DIR (optional): Directory path to process audio files in
+
+    Returns:
+        None: This function handles user interaction and calls other functions
+    """
+    # Load environment variables from .env file if it exists
+    load_dotenv()
+
     # Get the target directory from the user
-    directory = input("Enter the path to the directory containing audio files (MP3/M4A): ").strip()
+    directory = os.getenv('MP3_METADATA_STRIPPER_DIR')
+    if not directory:
+        directory = input("Enter the directory path: ").strip()
+
+    print(f"📁 Processing directory: {directory}")
 
     print_newline()
     print("Starting to process audio files 🎵")
@@ -162,3 +187,7 @@ if __name__ == "__main__":
     print_newline()
 
     print_result(result)
+
+
+if __name__ == "__main__":
+    main()
