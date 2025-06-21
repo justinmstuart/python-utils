@@ -26,6 +26,7 @@ Environment Variables:
 """
 
 import os
+from dotenv import load_dotenv
 
 def print_result(stats):
     """
@@ -147,6 +148,9 @@ def main():
     Returns:
         None: This function handles user interaction and calls other functions
     """
+    # Load environment variables from .env file if it exists
+    load_dotenv()
+
     # Get the target directory from the user
     directory = os.getenv('TRIM_FILENAMES_DIR')
     if not directory:
