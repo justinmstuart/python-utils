@@ -19,6 +19,14 @@ from mutagen.mp4 import MP4
 from mutagen.id3 import ID3, error
 from dotenv import load_dotenv
 
+from scripts.utils import print_newline, print_result
+
+TITLES = {
+    "success": "Successfully removed metadata from",
+    "warning": "No metadata found in",
+    "failed": "Failed to process"
+}
+
 def create_audio_file(file_path: str) -> MP3 | MP4 | None:
     """
     Creates an audio file object based on the file extension.
@@ -54,43 +62,6 @@ def remove_metadata(audio_file: MP3 | MP4):
     audio_file.delete()  # Remove all metadata
     audio_file.save()    # Save the file without metadata
 
-
-def print_result(stats):
-    """
-    Print the summary of metadata removal process results.
-
-    Args:
-        stats (dict): A dictionary containing the counts of processed files.
-            Expected keys:
-            - 'metadata_removed': Number of files successfully processed
-            - 'no_metadata_found': Number of files without metadata
-            - 'failed_count': Number of files that failed to process
-
-    Returns:
-        None: This function prints results to console only.
-    """
-    print()
-    print("Processing complete. 🥳")
-    print()
-    print("-" * 40)
-    print(f"✅ Successfully removed metadata from {stats['metadata_removed']} files.")
-    print(f"⚠️ Metadata not found in {stats['no_metadata_found']} files.")
-    print(f"🛑 Failed to process {stats['failed_count']} files.")
-    print("-" * 40)
-    print()
-
-def print_newline():
-    """
-    Print a newline character to standard output.
-
-    This function calls the print() function without arguments,
-    which results in only a newline character being printed.
-
-    Returns:
-        None
-    """
-    print()
-
 def remove_metadata_from_audio(directory_path):
     """
     Recursively removes metadata from all MP3 and M4A files in the specified directory and its subdirectories.
@@ -108,17 +79,17 @@ def remove_metadata_from_audio(directory_path):
         - Files with '.mp3' and '.m4a' extensions (case-insensitive) will be processed.
         - Progress messages are printed to the console.
     """
-    if not os.path.isdir(directory_path):
-        print(f"Error: {directory_path} is not a valid directory.")
-        return {
-            "metadata_removed": 0,
-            "no_metadata_found": 0,
-            "failed_count": 0
-        }
-
     metadata_removed = 0
     no_metadata_found = 0
     failed_count = 0
+
+    if not os.path.isdir(directory_path):
+        print(f"Error: {directory_path} is not a valid directory.")
+        return {
+            "metadata_removed": metadata_removed,
+            "no_metadata_found": no_metadata_found,
+            "failed_count": 1
+        }
 
     # Recursively traverse the directory structure
     for root, _, files in os.walk(directory_path):
@@ -184,9 +155,7 @@ def main():
     print_newline()
 
     result = remove_metadata_from_audio(directory)
-    print_newline()
-
-    print_result(result)
+    print_result(result, TITLES)
 
 
 if __name__ == "__main__":

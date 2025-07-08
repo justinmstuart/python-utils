@@ -28,41 +28,13 @@ Environment Variables:
 import os
 from dotenv import load_dotenv
 
-def print_result(stats):
-    """
-    Print the summary of the filename trimming process results.
+from scripts.utils import print_result
 
-    Args:
-        stats (dict): A dictionary containing the counts of processed files.
-            Expected keys:
-            - 'success_count': Number of files successfully renamed
-            - 'skipped_count': Number of files that were skipped
-            - 'failed_count': Number of files that failed to process
-
-    Returns:
-        None: This function prints results to console only.
-    """
-    print()
-    print("Processing complete. 🥳")
-    print()
-    print("-" * 40)
-    print(f"✅ Successfully trim chars from {stats['success_count']} filenames.")
-    print(f"⚠️ Skipped trimming chars from {stats['skipped_count']} filenames.")
-    print(f"🛑 Failed to trim chars from  {stats['failed_count']} filenames.")
-    print("-" * 40)
-    print()
-
-def print_newline():
-    """
-    Print a newline character to standard output.
-
-    This function calls the print() function without arguments,
-    which results in only a newline character being printed.
-
-    Returns:
-        None
-    """
-    print()
+TITLES = {
+        "success": "Successfully trimmed chars from",
+        "warning": "Skipped trimming chars from",
+        "failed": "Failed to trim chars from"
+    }
 
 def trim_filenames(directory_path, chars_to_trim):
     """
@@ -170,7 +142,7 @@ def main():
             print("🛑 Please enter a valid number.")
 
     result = trim_filenames(directory, num_chars)
-    print_result(result)
+    print_result(result, TITLES)
 
 if __name__ == "__main__":
     main()
