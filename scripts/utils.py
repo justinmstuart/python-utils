@@ -30,7 +30,7 @@ def print_result(stats, titles):
     print("-" * 40)
     print(f"✅ {titles['success']} {stats['success_count']}")
     print(f"⚠️ {titles['warning']} {stats['skipped_count']}")
-    print(f"🛑 {titles['failed']}  {stats['failed_count']}")
+    print(f"🛑 {titles['failed']} {stats['failed_count']}")
     print("-" * 40)
     print_newline()
 

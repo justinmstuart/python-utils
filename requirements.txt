@@ -1,2 +1,4 @@
 mutagen
+pytest
 python-dotenv
+
