@@ -1,4 +1,4 @@
 mutagen
 pytest
 python-dotenv
-
+Pillow
