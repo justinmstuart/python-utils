@@ -1,7 +1,10 @@
 """
 CBZ Processor
 
-This script compresses and optionally renames .cbz files in a specified directory. It creates a backup of each original file before processing, compresses images inside CBZ archives, and can rename files according to user input.
+This script compresses and optionally renames .cbz files in a specified directory.
+It creates a backup of each original file before processing,
+compresses images inside CBZ archives,
+and can rename files according to user input.
 
 Features:
     - Creates a backup of each original .cbz file as filename_original.cbz
@@ -73,7 +76,7 @@ def compress_cbz(file_path, output_path=None, quality=80, max_height=1024):
                             if img.height > max_height:
                                 aspect_ratio = img.width / img.height
                                 new_width = int(aspect_ratio * max_height)
-                                img = img.resize((new_width, max_height), Image.LANCZOS)
+                                img = img.resize((new_width, max_height), Image.Resampling.LANCZOS)
                             # Save the compressed image back to the temporary directory
                             img_compressed_path = os.path.join(temp_dir, file)
                             img.save(img_compressed_path, "PNG", quality=quality)
@@ -95,13 +98,13 @@ def clean_file_naming(filename, start_number):
     # Remove multiple consecutive spaces
     cleaned_name = re.sub(r'\s+', ' ', cleaned_name)
     # Rename the file using the specified naming format
-    base, extension = os.path.splitext(cleaned_name)
+    _, extension = os.path.splitext(cleaned_name)
     cleaned_name = f"{cleaned_name} {start_number:03}{extension}"
     return cleaned_name
 
-def process_cbz_files(directory, start_number, quality, max_height):
+def process_cbz_files(directory, quality, max_height):
     """
-    Compress and optionally rename .cbz files in the given directory.
+    Compress .cbz files in the given directory.
     For each file:
         - Create a backup as filename_original.cbz
         - Compress images inside the CBZ
@@ -111,7 +114,7 @@ def process_cbz_files(directory, start_number, quality, max_height):
     success_count = 0
     skipped_count = 0
     failed_count = 0
-    counter = start_number
+
     for filename in os.listdir(directory):
         filepath = os.path.join(directory, filename)
         if filename.endswith('.cbz'):
@@ -122,7 +125,6 @@ def process_cbz_files(directory, start_number, quality, max_height):
                 print(f"Creating backup: {original_copy_path}")
                 shutil.copy2(filepath, original_copy_path)
                 size_saved = compress_cbz(filepath, quality=quality, max_height=max_height)
-                # Optionally rename the file here if needed
                 print(f"✅ Optimized {os.path.basename(filepath)} | Size saved: {size_saved:.2f} MB")
                 success_count += 1
             except Exception as e:

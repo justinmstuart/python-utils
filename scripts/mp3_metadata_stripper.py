@@ -27,22 +27,20 @@ TITLES = {
     "failed": "Failed to process"
 }
 
-def create_audio_file(file_path: str) -> MP3 | MP4 | None:
+def create_audio_file(file_path):
     """
-    Creates an audio file object based on the file extension.
-
-    Args:
-        file_path (str): Path to the audio file.
-
-    Returns:
-        MP3 | MP4: An instance of MP3 or MP4 class based on the file type.
+    Create and return a Mutagen audio file object for MP3 or M4A files.
+    Returns None if the file type is unsupported or cannot be opened.
     """
-    if file_path.lower().endswith('.mp3'):
-        return MP3(file_path, ID3=ID3)
-    elif file_path.lower().endswith('.m4a'):
-        return MP4(file_path)
-    else:
+    ext = os.path.splitext(file_path)[1].lower()
+    try:
+        if ext == ".mp3":
+            return MP3(file_path, ID3=ID3)
+        elif ext == ".m4a":
+            return MP4(file_path)
+    except Exception:
         return None
+    return None
 
 
 def remove_metadata(audio_file: MP3 | MP4):
