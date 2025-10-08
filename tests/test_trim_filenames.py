@@ -26,9 +26,9 @@ def test_trim_filenames_success(tmp_path):
 
 def test_trim_filenames_skips_short_names(tmp_path):
     """
-    Test that trim_filenames skips files with names shorter than chars_to_trim.
+    Test that trim_filenames skips files with names that result in a base shorter than 3 after trimming.
     """
-    file1 = tmp_path / "ab.txt"
+    file1 = tmp_path / "abc.txt"  # base 'abc', after trimming 3: ''
     file1.write_text("data")
     result = trim_filenames(str(tmp_path), 3)
     assert result["skipped_count"] == 1
@@ -37,15 +37,15 @@ def test_trim_filenames_skips_short_names(tmp_path):
 
 def test_trim_filenames_handles_existing_file(tmp_path):
     """
-    Test that trim_filenames skips renaming if destination file already exists.
+    Test that trim_filenames skips renaming if destination file already exists or new base is too short.
     """
-    file1 = tmp_path / "abcfile.txt"
-    file2 = tmp_path / "file.txt"
+    file1 = tmp_path / "abcfile.txt"  # after trimming: 'file.txt', base 'file'
+    file2 = tmp_path / "abc.txt"      # after trimming: '.txt', base ''
     file1.write_text("data1")
     file2.write_text("data2")
     result = trim_filenames(str(tmp_path), 3)
     assert result["skipped_count"] == 1
-    assert file1.exists()
+    assert (tmp_path / "file.txt").exists()
     assert file2.exists()
 
 

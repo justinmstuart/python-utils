@@ -5,6 +5,17 @@ These tests cover the main functions in cbz_processor.py, using test_mp3_metadat
 """
 
 from scripts.cbz_processor import main as cbz_main, get_file_size, clean_file_naming, process_cbz_files
+import pytest
+
+
+@pytest.fixture(autouse=True)
+def patch_env_and_prompt(monkeypatch, tmp_path):
+    # Patch environment variables to dummy values
+    monkeypatch.setenv("CBZ_PROCESSOR_DIR", str(tmp_path))
+    monkeypatch.setenv("TRIM_FILENAMES_DIR", str(tmp_path))
+    monkeypatch.setenv("MP3_METADATA_STRIPPER_DIR", str(tmp_path))
+    # Patch get_directory_from_env_or_prompt to always return tmp_path
+    monkeypatch.setattr("scripts.utils.get_directory_from_env_or_prompt", lambda var: str(tmp_path))
 
 
 def test_cbz_main_runs(monkeypatch, tmp_path):

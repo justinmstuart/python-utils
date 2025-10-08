@@ -28,7 +28,7 @@ Environment Variables:
 import os
 from dotenv import load_dotenv
 
-from utils import print_result, get_directory_from_env_or_prompt
+from scripts.utils import print_result, get_directory_from_env_or_prompt
 
 TITLES = {
         "success": "Successfully trimmed chars from",
@@ -75,6 +75,21 @@ def trim_filenames(directory_path, chars_to_trim):
 
                 # Create new filename without first N characters
                 new_filename = filename[chars_to_trim:]
+
+                # Split base and extension
+                base, _ = os.path.splitext(new_filename)
+
+                # If the new base name is less than 3 characters or starts with a dot, skip
+                if len(base) < 3 or base.startswith('.'):
+                    print(f"Skipping {os.path.join(root, filename)}: new filename base '{base}' is too short or only extension")
+                    skipped_count += 1
+                    continue
+
+                # If the new filename is empty, skip
+                if not new_filename or len(new_filename) < 1:
+                    print(f"Skipping {os.path.join(root, filename)}: new filename is too short")
+                    skipped_count += 1
+                    continue
 
                 # Full paths for rename operation
                 old_path = os.path.join(root, filename)

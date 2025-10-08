@@ -19,7 +19,7 @@ from mutagen.mp4 import MP4
 from mutagen.id3 import ID3, error
 from dotenv import load_dotenv
 
-from utils import print_newline, print_result, get_directory_from_env_or_prompt
+from scripts.utils import print_newline, print_result, get_directory_from_env_or_prompt
 
 TITLES = {
     "success": "Successfully removed metadata from",

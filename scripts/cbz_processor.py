@@ -32,7 +32,7 @@ from PIL import Image
 import tempfile
 import shutil
 from dotenv import load_dotenv
-from utils import print_result, get_directory_from_env_or_prompt
+from scripts.utils import print_result, get_directory_from_env_or_prompt
 
 TITLES = {
     "success": "Successfully optimized",
@@ -102,7 +102,7 @@ def clean_file_naming(filename, start_number):
     cleaned_name = f"{cleaned_name} {start_number:03}{extension}"
     return cleaned_name
 
-def process_cbz_files(directory, quality, max_height):
+def process_cbz_files(directory, start_number, quality, max_height):
     """
     Compress .cbz files in the given directory.
     For each file:
