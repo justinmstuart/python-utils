@@ -1,0 +1,16 @@
+[run]
+branch = True
+parallel = True
+concurrency = multiprocessing
+
+[paths]
+source =
+    scripts
+    tests
+
+[report]
+omit =
+    scripts/__init__.py
+
+[env]
+COVERAGE_PROCESS_START = /home/justin/dev/python-utils/.coveragerc

@@ -51,12 +51,12 @@ def get_directory_from_env_or_prompt(env_var, prompt_msg="Enter the directory pa
         directory = input(prompt_msg).strip()
     return directory
 
-def prompt_positive_integer(prompt_msg="Enter a positive integer: "):
+def get_positive_integer_input(prompt_msg="Enter a positive integer: "):
     """
-    Prompt the user for a positive integer, repeating until valid input is given.
+    Prompt the user for a positive integer, with validation and error messages.
 
     Args:
-        prompt_msg (str): The message to display to the user.
+        prompt_msg (str): The prompt message to display.
 
     Returns:
         int: The positive integer entered by the user.
@@ -65,8 +65,8 @@ def prompt_positive_integer(prompt_msg="Enter a positive integer: "):
         try:
             value = int(input(prompt_msg).strip())
             if value <= 0:
-                print("🔢 Please enter a positive number.")
+                print("\U0001F522 Please enter a positive number.")
                 continue
             return value
         except ValueError:
-            print("🛑 Please enter a valid number.")
+            print("\U0001F6D1 Please enter a valid number.")

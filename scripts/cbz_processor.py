@@ -59,8 +59,16 @@ def compress_cbz(file_path, output_path=None, quality=80, max_height=1024):
     original_size = get_file_size(file_path)
     with tempfile.TemporaryDirectory() as temp_dir:
         # Extract all files to a temp directory
-        with zipfile.ZipFile(file_path, 'r') as zip_ref:
+        # Allow dependency injection for easier testing
+        def default_extract(zip_ref, temp_dir):
             zip_ref.extractall(temp_dir)
+        def default_image_open(img_path):
+            return Image.open(img_path)
+        extract_func = kwargs.get('extract_func', default_extract)
+        image_open_func = kwargs.get('image_open_func', default_image_open)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with zipfile.ZipFile(file_path, 'r') as zip_ref:
+                extract_func(zip_ref, temp_dir)
         compressed_path = os.path.join(temp_dir, "compressed.cbz")
         # Compress and optionally resize each image
         with zipfile.ZipFile(compressed_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
@@ -124,7 +132,7 @@ def process_cbz_files(directory, start_number, quality, max_height):
                 original_copy_path = os.path.join(directory, f"{base}_original{ext}")
                 print(f"Creating backup: {original_copy_path}")
                 shutil.copy2(filepath, original_copy_path)
-                size_saved = compress_cbz(filepath, quality=quality, max_height=max_height)
+                    size_saved = compress_cbz_func(filepath, quality=quality, max_height=max_height)
                 print(f"✅ Optimized {os.path.basename(filepath)} | Size saved: {size_saved:.2f} MB")
                 success_count += 1
             except Exception as e:

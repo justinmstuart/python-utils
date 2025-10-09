@@ -51,6 +51,8 @@ def trim_filenames(directory_path, chars_to_trim):
             - 'skipped_count': Number of files that were skipped
             - 'failed_count': Number of files that failed to process
     """
+        if os_path_exists_func is None:
+            os_path_exists_func = os.path.exists
     if not os.path.isdir(directory_path):
         print(f"Error: {directory_path} is not a valid directory")
         return {
@@ -96,7 +98,7 @@ def trim_filenames(directory_path, chars_to_trim):
                 new_path = os.path.join(root, new_filename)
 
                 # Check if destination already exists
-                if os.path.exists(new_path):
+                    if os_path_exists_func(new_path):
                     print(f"Skipping {old_path}: {new_filename} already exists")
                     skipped_count += 1
                     continue
