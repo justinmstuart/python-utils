@@ -1,3 +1,14 @@
+import os
+def make_summary_dict(success_count, skipped_count, failed_count):
+    """
+    Return a summary dictionary for processed files.
+    """
+    return {
+        "success_count": success_count,
+        "skipped_count": skipped_count,
+        "failed_count": failed_count
+    }
+
 def print_newline():
     """
     Print a newline character to standard output.
@@ -31,7 +42,6 @@ def print_result(stats, titles):
     print(f"✅ {titles['success']} {stats['success_count']}")
     print(f"⚠️ {titles['warning']} {stats['skipped_count']}")
     print(f"🛑 {titles['failed']} {stats['failed_count']}")
-    print("-" * 40)
     print_newline()
 
 def get_directory_from_env_or_prompt(env_var, prompt_msg="Enter the directory path: "):
@@ -45,7 +55,6 @@ def get_directory_from_env_or_prompt(env_var, prompt_msg="Enter the directory pa
     Returns:
         str: The directory path provided by the environment or user.
     """
-    import os
     directory = os.getenv(env_var)
     if not directory:
         directory = input(prompt_msg).strip()

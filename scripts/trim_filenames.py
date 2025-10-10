@@ -28,7 +28,7 @@ Environment Variables:
 import os
 from dotenv import load_dotenv
 
-from scripts.utils import print_result, get_directory_from_env_or_prompt
+from scripts.utils import print_result, get_directory_from_env_or_prompt, make_summary_dict
 
 TITLES = {
         "success": "Successfully trimmed chars from",
@@ -51,15 +51,9 @@ def trim_filenames(directory_path, chars_to_trim):
             - 'skipped_count': Number of files that were skipped
             - 'failed_count': Number of files that failed to process
     """
-        if os_path_exists_func is None:
-            os_path_exists_func = os.path.exists
     if not os.path.isdir(directory_path):
         print(f"Error: {directory_path} is not a valid directory")
-        return {
-            "success_count": 0,
-            "skipped_count": 0,
-            "failed_count": 1
-        }
+        return make_summary_dict(0, 0, 1)
 
     success_count = 0
     skipped_count = 0
@@ -83,7 +77,7 @@ def trim_filenames(directory_path, chars_to_trim):
 
                 # If the new base name is less than 3 characters or starts with a dot, skip
                 if len(base) < 3 or base.startswith('.'):
-                    print(f"Skipping {os.path.join(root, filename)}: new filename base '{base}' is too short or only extension")
+                    print(f"Skipping {os.path.join(root, filename)}: base '{base}' too short/ext")
                     skipped_count += 1
                     continue
 
@@ -95,10 +89,12 @@ def trim_filenames(directory_path, chars_to_trim):
 
                 # Full paths for rename operation
                 old_path = os.path.join(root, filename)
+                # Full paths for rename operation
+                old_path = os.path.join(root, filename)
                 new_path = os.path.join(root, new_filename)
 
                 # Check if destination already exists
-                    if os_path_exists_func(new_path):
+                if os.path.exists(new_path):
                     print(f"Skipping {old_path}: {new_filename} already exists")
                     skipped_count += 1
                     continue
@@ -107,15 +103,11 @@ def trim_filenames(directory_path, chars_to_trim):
                 os.rename(old_path, new_path)
                 print(f"Renamed: {old_path} → {new_path}")
                 success_count += 1
-    except (OSError, PermissionError) as e:
-        print(f"Error processing directory {directory_path}: {e}")
+    except Exception as e:
+        print(f"An error occurred during filename trimming: {e}")
         failed_count += 1
 
-    return {
-        "success_count": success_count,
-        "skipped_count": skipped_count,
-        "failed_count": failed_count
-    }
+    return make_summary_dict(success_count, skipped_count, failed_count)
 
 def main():
     """
@@ -143,7 +135,18 @@ def main():
     directory = get_directory_from_env_or_prompt('TRIM_FILENAMES_DIR')
     print(f"📁 Processing directory: {directory}")
 
-    num_chars = int(input("Enter the number of characters to remove from the beginning of each filename: "))
+    try:
+        num_chars = int(
+            input(
+            "Enter number of characters to remove from start of each filename: "
+            ).strip()
+        )
+        if num_chars < 1:
+            print("Number of characters must be a positive integer.")
+            return
+    except ValueError:
+        print("Invalid input. Please enter a positive integer.")
+        return
 
     result = trim_filenames(directory, num_chars)
     print_result(result, TITLES)

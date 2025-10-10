@@ -1,20 +1,18 @@
 """
 Unit tests for trim_filenames.py functions.
 
-These tests cover the trim_filenames function and main integration, using test_mp3_metadata_stripper.py as a template.
+These tests cover the trim_filenames function and main integration,
+using test_mp3_metadata_stripper.py as a template.
 """
 
-from scripts.trim_filenames import trim_filenames
-import os
 import pytest
-import sys
-import subprocess
+from scripts.trim_filenames import trim_filenames
+import scripts.trim_filenames as trim
+from tests.test_helpers import run_cli_with_env
 
 
 def test_trim_filenames_success(tmp_path):
-    """
-    Test that trim_filenames successfully renames files with sufficient length.
-    """
+    """Test renaming files with sufficient length using trim_filenames."""
     file1 = tmp_path / "abcfile1.txt"
     file2 = tmp_path / "abcfile2.txt"
     file1.write_text("data1")
@@ -28,10 +26,8 @@ def test_trim_filenames_success(tmp_path):
 
 
 def test_trim_filenames_skips_short_names(tmp_path):
-    """
-    Test that trim_filenames skips files with names that result in a base shorter than 3 after trimming.
-    """
-    file1 = tmp_path / "abc.txt"  # base 'abc', after trimming 3: ''
+    """Test skipping files with base shorter than min length after trimming."""
+    file1 = tmp_path / "abc.txt"
     file1.write_text("data")
     result = trim_filenames(str(tmp_path), 3)
     assert result["skipped_count"] == 1
@@ -39,11 +35,9 @@ def test_trim_filenames_skips_short_names(tmp_path):
 
 
 def test_trim_filenames_handles_existing_file(tmp_path):
-    """
-    Test that trim_filenames skips renaming if destination file already exists or new base is too short.
-    """
-    file1 = tmp_path / "abcfile.txt"  # after trimming: 'file.txt', base 'file'
-    file2 = tmp_path / "abc.txt"      # after trimming: '.txt', base ''
+    """Test skipping renaming if destination exists or base is too short."""
+    file1 = tmp_path / "abcfile.txt"
+    file2 = tmp_path / "abc.txt"
     file1.write_text("data1")
     file2.write_text("data2")
     result = trim_filenames(str(tmp_path), 3)
@@ -53,17 +47,13 @@ def test_trim_filenames_handles_existing_file(tmp_path):
 
 
 def test_trim_filenames_invalid_dir():
-    """
-    Test that trim_filenames returns failed_count for invalid directory.
-    """
+    """Test failed_count for invalid directory."""
     result = trim_filenames("/not/a/real/dir", 3)
     assert result["failed_count"] == 1
 
 
 def test_trim_filenames_recursive(tmp_path):
-    """
-    Test that trim_filenames works recursively in subdirectories.
-    """
+    """Test recursive renaming in subdirectories."""
     subdir = tmp_path / "sub"
     subdir.mkdir()
     file1 = subdir / "abcfile.txt"
@@ -75,10 +65,7 @@ def test_trim_filenames_recursive(tmp_path):
 
 
 def test_trim_filenames_oserror(monkeypatch, tmp_path):
-    """
-    Simulate OSError in trim_filenames.
-    """
-    from scripts.trim_filenames import trim_filenames
+    """Simulate OSError in trim_filenames."""
     file1 = tmp_path / "abcfile.txt"
     file1.write_text("data")
     def fake_rename(src, dst):
@@ -89,10 +76,7 @@ def test_trim_filenames_oserror(monkeypatch, tmp_path):
 
 
 def test_trim_filenames_permissionerror(monkeypatch, tmp_path):
-    """
-    Simulate PermissionError in trim_filenames.
-    """
-    from scripts.trim_filenames import trim_filenames
+    """Simulate PermissionError in trim_filenames."""
     file1 = tmp_path / "abcfile.txt"
     file1.write_text("data")
     def fake_rename(src, dst):
@@ -109,7 +93,7 @@ def test_trim_filenames_permissionerror(monkeypatch, tmp_path):
     ("file.with.many.dots.txt", False),
 ])
 def test_trim_filenames_edge_cases(tmp_path, filename, expected_skip):
-    from scripts.trim_filenames import trim_filenames
+    """Test edge cases for filename trimming."""
     file = tmp_path / filename
     file.write_text("data")
     result = trim_filenames(str(tmp_path), 3)
@@ -120,36 +104,44 @@ def test_trim_filenames_edge_cases(tmp_path, filename, expected_skip):
 
 
 def test_trim_filenames_print_output(capsys, tmp_path):
-    from scripts.trim_filenames import trim_filenames
-    file1 = tmp_path / "abcfile.txt"
+    """Test print output for renaming and skipping."""
+    file1 = tmp_path / "abc_file1.txt"
     file1.write_text("data")
-    result = trim_filenames(str(tmp_path), 3)
+    trim_filenames(str(tmp_path), 3)
     out = capsys.readouterr().out
     assert "Renamed" in out or "Skipping" in out
 
 
 def test_trim_filenames_summary(monkeypatch, capsys, tmp_path):
-    from scripts.trim_filenames import trim_filenames
-    file1 = tmp_path / "failfile.txt"
+    """Test summary output when OSError occurs."""
+    file1 = tmp_path / "fail_file.txt"
     file1.write_text("data")
     monkeypatch.setattr("os.rename", lambda src, dst: (_ for _ in ()).throw(OSError("fail")))
-    result = trim_filenames(str(tmp_path), 3)
+    trim_filenames(str(tmp_path), 3)
     out = capsys.readouterr().out
-    assert "Error processing directory" in out
+    assert "An error occurred during filename trimming" in out
 
 
 def test_trim_filenames_main_summary(monkeypatch, capsys, tmp_path):
-    import scripts.trim_filenames as trim
+    """Test main summary output for successful run."""
     monkeypatch.setattr(trim, "get_directory_from_env_or_prompt", lambda env: str(tmp_path))
     monkeypatch.setattr("builtins.input", lambda _: "3")
-    monkeypatch.setattr(trim, "trim_filenames", lambda d, n: {"success_count": 1, "skipped_count": 0, "failed_count": 0})
+    monkeypatch.setattr(
+        trim,
+        "trim_filenames",
+        lambda d, n: {
+            "success_count": 1,
+            "skipped_count": 0,
+            "failed_count": 0,
+        },
+    )
     trim.main()
     out = capsys.readouterr().out
     assert "Processing directory" in out and "Success" in out
 
 
 def test_trim_filenames_main_system_exit(monkeypatch):
-    import scripts.trim_filenames as trim
+    """Test main exits with SystemExit when directory prompt fails."""
     def fake_get_directory(env):
         raise SystemExit(1)
     monkeypatch.setattr(trim, "get_directory_from_env_or_prompt", fake_get_directory)
@@ -158,7 +150,7 @@ def test_trim_filenames_main_system_exit(monkeypatch):
 
 
 def test_trim_filenames_skip_short_name(tmp_path, capsys):
-    from scripts.trim_filenames import trim_filenames
+    """Test skipping file when new name is too short."""
     file = tmp_path / "ab.txt"
     file.write_text("data")
     result = trim_filenames(str(tmp_path), 3)
@@ -168,7 +160,7 @@ def test_trim_filenames_skip_short_name(tmp_path, capsys):
 
 
 def test_trim_filenames_skip_dot_base(tmp_path, capsys):
-    from scripts.trim_filenames import trim_filenames
+    """Test skipping file when new base is a dot."""
     file = tmp_path / ".abc.txt"
     file.write_text("data")
     result = trim_filenames(str(tmp_path), 1)
@@ -178,10 +170,9 @@ def test_trim_filenames_skip_dot_base(tmp_path, capsys):
 
 
 def test_trim_filenames_skip_empty_new_filename(tmp_path, capsys):
-    from scripts.trim_filenames import trim_filenames
+    """Test skipping file when new filename is empty after trimming."""
     file = tmp_path / "abc.txt"
     file.write_text("data")
-    # chars_to_trim greater than filename length
     result = trim_filenames(str(tmp_path), 10)
     out = capsys.readouterr().out
     assert "new filename is too short" in out or "Skipping" in out
@@ -189,7 +180,7 @@ def test_trim_filenames_skip_empty_new_filename(tmp_path, capsys):
 
 
 def test_trim_filenames_skip_already_exists(tmp_path, capsys):
-    from scripts.trim_filenames import trim_filenames
+    """Test skipping file when destination already exists."""
     file = tmp_path / "abcfile.txt"
     file.write_text("data")
     new_file = tmp_path / "file.txt"
@@ -201,10 +192,9 @@ def test_trim_filenames_skip_already_exists(tmp_path, capsys):
 
 
 def test_trim_filenames_skip_already_exists_branch(tmp_path, capsys):
-    from scripts.trim_filenames import trim_filenames
+    """Test skipping file when destination exists (branch coverage)."""
     file = tmp_path / "abcfile.txt"
     file.write_text("data")
-    # Create destination file that already exists
     new_file = tmp_path / "file.txt"
     new_file.write_text("data")
     result = trim_filenames(str(tmp_path), 3)
@@ -214,10 +204,9 @@ def test_trim_filenames_skip_already_exists_branch(tmp_path, capsys):
 
 
 def test_trim_filenames_skip_already_exists_precise(tmp_path, capsys):
-    from scripts.trim_filenames import trim_filenames
+    """Test skipping file when destination exists (precise coverage)."""
     file = tmp_path / "abcfile.txt"
     file.write_text("data")
-    # The destination file (after trimming) already exists
     new_file = tmp_path / "file.txt"
     new_file.write_text("data")
     result = trim_filenames(str(tmp_path), 3)
@@ -227,11 +216,11 @@ def test_trim_filenames_skip_already_exists_precise(tmp_path, capsys):
 
 
 def test_trim_filenames_cli_entry(tmp_path):
-    env = os.environ.copy()
-    env["PYTHONPATH"] = os.path.dirname(os.path.dirname(__file__))
-    env["TRIM_FILENAMES_DIR"] = str(tmp_path)
-    try:
-        result = subprocess.run([sys.executable, "-m", "coverage", "run", "-m", "scripts.trim_filenames"], input=b"3\n", capture_output=True, env=env, timeout=5)
-        assert b"Processing directory" in result.stdout or b"Error" in result.stdout or b"ModuleNotFoundError" in result.stderr
-    except subprocess.TimeoutExpired:
-        pytest.skip("CLI test timed out (likely waiting for input)")
+    """Test CLI entry for trim_filenames script."""
+    env_vars = {"TRIM_FILENAMES_DIR": str(tmp_path)}
+    result = run_cli_with_env("scripts.trim_filenames", env_vars, input_bytes=b"3\n")
+    assert (
+        b"Processing directory" in result.stdout or
+        b"Error" in result.stdout or
+        b"ModuleNotFoundError" in result.stderr
+    )

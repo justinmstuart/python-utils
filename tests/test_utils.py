@@ -5,9 +5,8 @@ This file tests utility functions for printing newlines, printing results,
 and getting directory paths from environment variables or user input.
 """
 
-from unittest import mock
-import pytest
 from scripts.utils import get_directory_from_env_or_prompt, print_newline, print_result
+from scripts.utils import get_positive_integer_input
 
 
 def test_print_newline(capsys):
@@ -71,7 +70,6 @@ def test_print_result_various(capsys):
     """
     Test print_result with various input combinations.
     """
-    from scripts.utils import print_result
     result = {"success_count": 5, "skipped_count": 0, "failed_count": 0}
     titles = {"success": "Success", "warning": "Warning", "failed": "Failed"}
     print_result(result, titles)
@@ -91,20 +89,20 @@ def test_print_result_all_zero(capsys):
     """
     Test print_result when all counts are zero.
     """
-    from scripts.utils import print_result
     result = {"success_count": 0, "skipped_count": 0, "failed_count": 0}
     titles = {"success": "Success", "warning": "Warning", "failed": "Failed"}
     print_result(result, titles)
     out = capsys.readouterr().out
     assert "Processing complete" in out
-
-
 def test_get_positive_integer_input(monkeypatch, capsys):
-    from scripts.utils import get_positive_integer_input
+    """
+    Test get_positive_integer_input prompts until a valid positive integer is entered.
+    """
     inputs = iter(["-1", "abc", "0", "5"])
     monkeypatch.setattr("builtins.input", lambda _: next(inputs))
     result = get_positive_integer_input("Enter a number: ")
     out = capsys.readouterr().out
     assert result == 5
     assert "Please enter a positive number" in out
+    assert "Please enter a valid number" in out
     assert "Please enter a valid number" in out

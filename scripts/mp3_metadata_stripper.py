@@ -18,8 +18,17 @@ from mutagen.mp3 import MP3
 from mutagen.mp4 import MP4
 from mutagen.id3 import ID3, error
 from dotenv import load_dotenv
-
 from scripts.utils import print_newline, print_result, get_directory_from_env_or_prompt
+from scripts.utils import make_summary_dict
+
+def remove_metadata(audio_file):
+    """
+    Remove all metadata from the given audio file and save changes.
+    Args:
+        audio_file (MP3 | MP4): The audio file object from which to remove metadata.
+    """
+    audio_file.delete()
+    audio_file.save()
 
 TITLES = {
     "success": "Successfully removed metadata from",
@@ -33,36 +42,22 @@ def create_audio_file(file_path):
     Returns None if the file type is unsupported or cannot be opened.
     """
     ext = os.path.splitext(file_path)[1].lower()
-    try:
-        if ext == ".mp3":
+    if ext == ".mp3":
+        try:
             return MP3(file_path, ID3=ID3)
-        elif ext == ".m4a":
+        except Exception:
+            return None
+    if ext == ".m4a":
+        try:
             return MP4(file_path)
-    except Exception:
-        return None
+        except Exception:
+            return None
     return None
-
-
-def remove_metadata(audio_file: MP3 | MP4):
-    """
-    Remove all metadata from an audio file and save the changes.
-
-    This function removes all metadata tags from the given audio file object
-    and saves the changes back to the file on disk.
-
-    Args:
-        audio_file (MP3 | MP4): The audio file object from which to remove metadata.
-                              Must be either an MP3 or MP4 object with delete() and save() methods.
-
-    Returns:
-        None
-    """
-    audio_file.delete()  # Remove all metadata
-    audio_file.save()    # Save the file without metadata
 
 def remove_metadata_from_audio(directory_path):
     """
-    Recursively removes metadata from all MP3 and M4A files in the specified directory and its subdirectories.
+    Recursively removes metadata from all MP3 and M4A files in the specified directory
+    and its subdirectories.
 
     Args:
         directory_path (str): Path to the directory containing audio files.
@@ -70,7 +65,7 @@ def remove_metadata_from_audio(directory_path):
 
     Returns:
         dict: Statistics about processed files including counts of metadata removed,
-              files without metadata, and failures.
+            files without metadata, and failures.
 
     Notes:
         - This function uses os.walk to recursively traverse all subdirectories.
@@ -83,11 +78,7 @@ def remove_metadata_from_audio(directory_path):
 
     if not os.path.isdir(directory_path):
         print(f"Error: {directory_path} is not a valid directory.")
-        return {
-            "success_count": success_count,
-            "skipped_count": skipped_count,
-            "failed_count": 1
-        }
+        return make_summary_dict(success_count, skipped_count, 1)
 
     # Recursively traverse the directory structure
     for root, _, files in os.walk(directory_path):
@@ -113,11 +104,7 @@ def remove_metadata_from_audio(directory_path):
                 failed_count += 1
                 print(f"Unexpected error processing {file_path}: {str(e)}")
 
-    return {
-        "success_count": success_count,
-        "skipped_count": skipped_count,
-        "failed_count": failed_count
-    }
+    return make_summary_dict(success_count, skipped_count, failed_count)
 
 def main():
     """
