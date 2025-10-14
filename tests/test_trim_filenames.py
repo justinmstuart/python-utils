@@ -224,3 +224,21 @@ def test_trim_filenames_cli_entry(tmp_path):
         b"Error" in result.stdout or
         b"ModuleNotFoundError" in result.stderr
     )
+
+
+def test_trim_filenames_main_negative_input(monkeypatch, capsys, tmp_path):
+    """Test main with negative number input (lines 144-146)."""
+    monkeypatch.setattr(trim, "get_directory_from_env_or_prompt", lambda env: str(tmp_path))
+    monkeypatch.setattr("builtins.input", lambda _: "-1")
+    trim.main()
+    out = capsys.readouterr().out
+    assert "Number of characters must be a positive integer" in out
+
+
+def test_trim_filenames_main_invalid_input(monkeypatch, capsys, tmp_path):
+    """Test main with non-numeric input (lines 147-149)."""
+    monkeypatch.setattr(trim, "get_directory_from_env_or_prompt", lambda env: str(tmp_path))
+    monkeypatch.setattr("builtins.input", lambda _: "abc")
+    trim.main()
+    out = capsys.readouterr().out
+    assert "Invalid input" in out

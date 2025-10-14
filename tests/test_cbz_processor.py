@@ -435,3 +435,58 @@ def test_compress_cbz_extractall_exception(monkeypatch, tmp_path):
         zf.writestr("image.png", b"fake")
     compress_cbz(str(cbz_path))
     # capsys is not defined in this test, so output assertion removed
+
+
+def test_process_cbz_files_success_path(monkeypatch, tmp_path, capsys):
+    """Test process_cbz_files success path with valid CBZ (lines 127-128, 135)."""
+    cbz_path = tmp_path / "test.cbz"
+    # Create a valid CBZ with an image
+    with zipfile.ZipFile(cbz_path, 'w') as zf:
+        zf.writestr("image.png", b"\x89PNG\r\n\x1a\n" + b"\x00" * 100)
+
+    # Mock compress_cbz to return a valid size saved value
+    def mock_compress_cbz(_filepath, **_kwargs):
+        return 1.5  # Simulate 1.5 MB saved
+
+    monkeypatch.setattr("scripts.cbz_processor.compress_cbz", mock_compress_cbz)
+
+    result = process_cbz_files(str(tmp_path), 80, 1024)
+    out = capsys.readouterr().out
+
+    # These assertions cover lines 127-128 (print statements in success path)
+    assert "Optimized" in out or "Creating backup" in out
+    assert result["success_count"] == 1
+    assert result["failed_count"] == 0
+
+
+def test_compress_cbz_with_output_path(monkeypatch, tmp_path):
+    """Test compress_cbz with explicit output_path (branch 75->77)."""
+    cbz_path = tmp_path / "test.cbz"
+    output_path = tmp_path / "output.cbz"
+
+    # Create a minimal valid CBZ
+    with zipfile.ZipFile(cbz_path, 'w') as zf:
+        zf.writestr("image.png", b"\x89PNG\r\n\x1a\n" + b"\x00" * 100)
+
+    # Mock the image processing to avoid PIL issues
+    class DummyImg:
+        """Dummy image for testing."""
+        mode = 'RGB'
+        height = 100
+        width = 100
+        def save(self, *args, **kwargs):
+            """Mock save."""
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            return False
+
+    monkeypatch.setattr("PIL.Image.open", lambda path: DummyImg())
+
+    # This should use the output_path parameter, covering the else branch
+    size_saved = compress_cbz(
+        str(cbz_path), output_path=str(output_path), quality=80, max_height=1024
+    )
+
+    assert isinstance(size_saved, (int, float))
+    assert output_path.exists()

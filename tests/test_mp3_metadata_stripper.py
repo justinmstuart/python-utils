@@ -364,3 +364,20 @@ def test_remove_metadata_from_audio_error_branch(monkeypatch, tmp_path, capsys):
     out = capsys.readouterr().out
     assert "Failed to process" in out
     assert result["failed_count"] >= 1
+
+
+def test_remove_metadata_from_audio_generic_exception(monkeypatch, tmp_path, capsys):
+    """Test remove_metadata_from_audio handles generic Exception (lines 103-105)."""
+    mp3_path = tmp_path / "test.mp3"
+    mp3_path.write_bytes(b"ID3")
+    class DummyAudio:
+        """Dummy audio with tags."""
+        tags = True
+    def raise_generic_exception(_):
+        raise RuntimeError("unexpected error")
+    monkeypatch.setattr("scripts.mp3_metadata_stripper.create_audio_file", lambda _: DummyAudio())
+    monkeypatch.setattr("scripts.mp3_metadata_stripper.remove_metadata", raise_generic_exception)
+    result = remove_metadata_from_audio(str(tmp_path))
+    out = capsys.readouterr().out
+    assert "Unexpected error processing" in out
+    assert result["failed_count"] >= 1

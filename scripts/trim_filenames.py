@@ -81,14 +81,6 @@ def trim_filenames(directory_path, chars_to_trim):
                     skipped_count += 1
                     continue
 
-                # If the new filename is empty, skip
-                if not new_filename or len(new_filename) < 1:
-                    print(f"Skipping {os.path.join(root, filename)}: new filename is too short")
-                    skipped_count += 1
-                    continue
-
-                # Full paths for rename operation
-                old_path = os.path.join(root, filename)
                 # Full paths for rename operation
                 old_path = os.path.join(root, filename)
                 new_path = os.path.join(root, new_filename)
