@@ -1,5 +1,7 @@
 # Python Utils
 
+[![Tests](https://github.com/justinmstuart/python-utils/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/justinmstuart/python-utils/actions/workflows/tests.yml)
+
 This is a collection of Python scripts to automate tasks.
 
 ## Available Scripts
