@@ -1,5 +1,7 @@
 # Python Utils
 
+[![Tests](https://github.com/justinmstuart/python-utils/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/justinmstuart/python-utils/actions/workflows/tests.yml)
+
 This is a collection of Python scripts to automate tasks.
 
 ## Available Scripts
@@ -12,7 +14,7 @@ Scripts are fully tested, linted, and compatible with both direct execution and 
 
 ## Requirements
 
-- Python 3.6+
+- Python 3.12+
 
 ## Getting Started
 
@@ -39,16 +41,18 @@ To check code quality and style (using your project's .pylintrc):
 pylint --rcfile=.pylintrc scripts tests
 ```
 
+## Running Tests
+
+To run all tests:
+
+```bash
+pytest
+```
+
 ## Running Tests with Coverage
 
 To run all tests and check code coverage:
 
 ```bash
-pytest --maxfail=1 --disable-warnings --cov=scripts --cov-report=term-missing
-```
-
-You can also run coverage for a specific test file:
-
-```bash
-pytest --cov=scripts tests/test_trim_filenames.py
+coverage run -m pytest && coverage report --include=scripts/*
 ```
