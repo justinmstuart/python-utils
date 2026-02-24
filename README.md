@@ -41,16 +41,18 @@ To check code quality and style (using your project's .pylintrc):
 pylint --rcfile=.pylintrc scripts tests
 ```
 
+## Running Tests
+
+To run all tests:
+
+```bash
+pytest
+```
+
 ## Running Tests with Coverage
 
 To run all tests and check code coverage:
 
 ```bash
-pytest --maxfail=1 --disable-warnings --cov=scripts --cov-report=term-missing
-```
-
-You can also run coverage for a specific test file:
-
-```bash
-pytest --cov=scripts tests/test_trim_filenames.py
+coverage run -m pytest && coverage report --include=scripts/*
 ```

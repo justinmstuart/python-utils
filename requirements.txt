@@ -1,6 +1,6 @@
 Pillow
+coverage
 mutagen
 pylint
 pytest
-pytest-cov
 python-dotenv
