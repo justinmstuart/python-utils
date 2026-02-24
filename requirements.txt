@@ -2,4 +2,5 @@ Pillow
 mutagen
 pylint
 pytest
+pytest-cov
 python-dotenv

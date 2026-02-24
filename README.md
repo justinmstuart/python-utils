@@ -14,7 +14,7 @@ Scripts are fully tested, linted, and compatible with both direct execution and 
 
 ## Requirements
 
-- Python 3.6+
+- Python 3.12+
 
 ## Getting Started
 
