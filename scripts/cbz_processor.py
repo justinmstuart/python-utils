@@ -67,7 +67,7 @@ def _compress_and_write_image(img_path, temp_dir, zipf, quality, max_height):
         arcname = os.path.relpath(img_compressed_path, temp_dir)
         zipf.write(img_compressed_path, arcname)
 
-def compress_cbz(file_path, output_path=None, quality=80, max_height=1024):
+def compress_cbz(file_path, output_path=None, quality=100, max_height=1024):
     """
     Compress images in a CBZ file and optionally resize them.
     Returns the size saved in MB.
@@ -118,26 +118,27 @@ def process_cbz_files(directory, quality, max_height):
         "failed_count": 0
     }
 
-    def backup_and_compress_cbz(filepath, filename):
+    def backup_and_compress_cbz(filepath, filename, source_directory):
         base, ext = os.path.splitext(filename)
-        original_copy_path = os.path.join(directory, f"{base}_original{ext}")
+        original_copy_path = os.path.join(source_directory, f"{base}_original{ext}")
         print(f"Creating backup: {original_copy_path}")
         shutil.copy2(filepath, original_copy_path)
         size_saved = compress_cbz(filepath, quality=quality, max_height=max_height)
         print(f"✅ Optimized {os.path.basename(filepath)} | Size saved: {size_saved:.2f} MB")
         return size_saved
 
-    for filename in os.listdir(directory):
-        filepath = os.path.join(directory, filename)
-        if filename.endswith('.cbz'):
-            try:
-                backup_and_compress_cbz(filepath, filename)
-                counts["success_count"] += 1
-            except Exception as e:
-                print(f"🛑 Failed to process {filename}: {e}")
-                counts["failed_count"] += 1
-        else:
-            counts["skipped_count"] += 1
+    for source_directory, _, filenames in os.walk(directory):
+        for filename in filenames:
+            filepath = os.path.join(source_directory, filename)
+            if filename.lower().endswith('.cbz'):
+                try:
+                    backup_and_compress_cbz(filepath, filename, source_directory)
+                    counts["success_count"] += 1
+                except Exception as e:
+                    print(f"🛑 Failed to process {filename}: {e}")
+                    counts["failed_count"] += 1
+            else:
+                counts["skipped_count"] += 1
     return counts
 
 def main():

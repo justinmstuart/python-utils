@@ -490,3 +490,49 @@ def test_compress_cbz_with_output_path(monkeypatch, tmp_path):
 
     assert isinstance(size_saved, (int, float))
     assert output_path.exists()
+
+
+def test_process_cbz_files_recursive_discovers_nested_cbz(monkeypatch, tmp_path):
+    """Test process_cbz_files processes CBZ files in subdirectories."""
+    nested_dir = tmp_path / "nested"
+    nested_dir.mkdir()
+    cbz_path = nested_dir / "book.cbz"
+    cbz_path.write_bytes(b"dummy")
+
+    monkeypatch.setattr("scripts.cbz_processor.compress_cbz", lambda *_a, **_kw: 1.0)
+
+    result = process_cbz_files(str(tmp_path), 80, 1024)
+
+    assert result["success_count"] == 1
+    assert (nested_dir / "book_original.cbz").exists()
+
+
+def test_process_cbz_files_case_insensitive_extension(monkeypatch, tmp_path):
+    """Test process_cbz_files accepts uppercase/mixed-case .CBZ extension."""
+    cbz_path = tmp_path / "Book.CBZ"
+    cbz_path.write_bytes(b"dummy")
+
+    monkeypatch.setattr("scripts.cbz_processor.compress_cbz", lambda *_a, **_kw: 1.0)
+
+    result = process_cbz_files(str(tmp_path), 80, 1024)
+
+    assert result["success_count"] == 1
+    assert (tmp_path / "Book_original.CBZ").exists()
+
+
+def test_process_cbz_files_same_name_different_subdirectories(monkeypatch, tmp_path):
+    """Test backups for same basename in different folders do not collide."""
+    folder_a = tmp_path / "a"
+    folder_b = tmp_path / "b"
+    folder_a.mkdir()
+    folder_b.mkdir()
+    (folder_a / "comic.cbz").write_bytes(b"dummy")
+    (folder_b / "comic.cbz").write_bytes(b"dummy")
+
+    monkeypatch.setattr("scripts.cbz_processor.compress_cbz", lambda *_a, **_kw: 1.0)
+
+    result = process_cbz_files(str(tmp_path), 80, 1024)
+
+    assert result["success_count"] == 2
+    assert (folder_a / "comic_original.cbz").exists()
+    assert (folder_b / "comic_original.cbz").exists()

@@ -11,6 +11,7 @@ Scripts are fully tested, linted, and compatible with both direct execution and 
 - **scripts/trim_filenames.py**: Recursively removes a specified number of characters from the beginning of filenames in a directory and its subdirectories.
 - **scripts/mp3_metadata_stripper.py**: Recursively removes metadata from mp3 and m4a files in a directory and its subdirectories.
 - **scripts/cbz_processor.py**: Compresses and optimizes CBZ files in a directory (see script for details).
+- **scripts/cbz_clean_up.py**: Recursively deletes CBZ backup files ending in `_original.cbz`.
 
 ## Requirements
 
@@ -31,6 +32,7 @@ You can run any script directly or as a module:
 python -m scripts.trim_filenames
 python -m scripts.mp3_metadata_stripper
 python -m scripts.cbz_processor
+python -m scripts.cbz_clean_up
 ```
 
 ## Linting & Code Quality
