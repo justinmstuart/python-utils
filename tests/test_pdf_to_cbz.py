@@ -79,7 +79,12 @@ def test_process_pdf_files_recurses_and_skips_non_pdf(monkeypatch, tmp_path):
     text_file.write_text("skip")
 
     seen = []
-    monkeypatch.setattr(pdf_to_cbz, "convert_pdf_to_cbz", lambda path, **_kwargs: seen.append(path))
+
+    def fake_convert(path, **_kwargs):
+        seen.append(path)
+        return f"{path}.cbz"
+
+    monkeypatch.setattr(pdf_to_cbz, "convert_pdf_to_cbz", fake_convert)
 
     result = pdf_to_cbz.process_pdf_files(str(tmp_path))
 
