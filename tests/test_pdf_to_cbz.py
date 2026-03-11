@@ -2,6 +2,7 @@
 
 import zipfile
 
+import pytest
 from scripts import pdf_to_cbz
 from tests.test_helpers import run_cli_with_env
 
@@ -134,3 +135,28 @@ def test_cli_entry(tmp_path):
     result = run_cli_with_env("scripts.pdf_to_cbz", env_vars)
     assert result is not None
     assert result.returncode == 0
+
+
+def test_clear_output_directory_validates_expected_name(tmp_path):
+    """Cleanup should reject directories that do not match expected basename."""
+    output_directory = tmp_path / "actual_name"
+    output_directory.mkdir()
+    with pytest.raises(ValueError):
+        pdf_to_cbz.clear_output_directory(str(output_directory), "other_name")
+
+
+def test_clear_output_directory_raises_runtime_error_on_delete_failure(monkeypatch, tmp_path):
+    """Cleanup should raise RuntimeError when deleting generated files fails."""
+    output_directory = tmp_path / "comic"
+    output_directory.mkdir()
+    generated_file = output_directory / "comic_001.png"
+    generated_file.write_bytes(b"image")
+
+    monkeypatch.setattr(
+        pdf_to_cbz.os,
+        "remove",
+        lambda _path: (_ for _ in ()).throw(OSError("cannot delete")),
+    )
+
+    with pytest.raises(RuntimeError):
+        pdf_to_cbz.clear_output_directory(str(output_directory), "comic")

@@ -33,18 +33,29 @@ TITLES = {
 }
 
 
+def clear_output_directory(output_directory, expected_directory_name):
+    """Remove previously generated files from the output image directory."""
+    if os.path.basename(output_directory) != expected_directory_name:
+        raise ValueError(f"Refusing to clean unexpected directory: {output_directory}")
+
+    try:
+        for entry_name in os.listdir(output_directory):
+            entry_path = os.path.join(output_directory, entry_name)
+            if os.path.isdir(entry_path):
+                shutil.rmtree(entry_path)
+            else:
+                os.remove(entry_path)
+    except OSError as error:
+        raise RuntimeError(f"Failed to clean output directory: {output_directory}") from error
+
+
 def convert_pdf_to_image_directory(pdf_path):
     """Convert a PDF to sequentially named PNG files in a same-name directory."""
     directory = os.path.dirname(pdf_path)
     pdf_name = os.path.splitext(os.path.basename(pdf_path))[0]
     output_directory = os.path.join(directory, pdf_name)
     os.makedirs(output_directory, exist_ok=True)
-    for entry_name in os.listdir(output_directory):
-        entry_path = os.path.join(output_directory, entry_name)
-        if os.path.isdir(entry_path):
-            shutil.rmtree(entry_path)
-        else:
-            os.remove(entry_path)
+    clear_output_directory(output_directory, pdf_name)
 
     for index, image in enumerate(convert_from_path(pdf_path), start=1):
         output_filename = f"{pdf_name}_{index:03}.png"
