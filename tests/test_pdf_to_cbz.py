@@ -26,17 +26,21 @@ def test_convert_pdf_to_image_directory_uses_expected_filenames(monkeypatch, tmp
     stale_file = tmp_path / "Book Name" / "Book Name_999.png"
     stale_file.parent.mkdir()
     stale_file.write_bytes(b"stale")
+    convert_calls = []
 
-    monkeypatch.setattr(
-        pdf_to_cbz,
-        "convert_from_path",
-        lambda _: [DummyImage(b"page1"), DummyImage(b"page2")],
-    )
+    monkeypatch.setattr(pdf_to_cbz, "pdfinfo_from_path", lambda _: {"Pages": 2})
+
+    def fake_convert(_pdf_path, first_page, last_page):
+        convert_calls.append((first_page, last_page))
+        return [DummyImage(f"page-{first_page}".encode())]
+
+    monkeypatch.setattr(pdf_to_cbz, "convert_from_path", fake_convert)
 
     output_directory = pdf_to_cbz.convert_pdf_to_image_directory(str(pdf_path))
 
     assert (tmp_path / "Book Name" / "Book Name_001.png").exists()
     assert (tmp_path / "Book Name" / "Book Name_002.png").exists()
+    assert convert_calls == [(1, 1), (2, 2)]
     assert not stale_file.exists()
     assert pdf_path.exists()
     assert output_directory == str(tmp_path / "Book Name")

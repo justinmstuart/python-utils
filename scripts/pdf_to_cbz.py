@@ -21,7 +21,7 @@ import shutil
 import zipfile
 
 from dotenv import load_dotenv
-from pdf2image import convert_from_path
+from pdf2image import convert_from_path, pdfinfo_from_path
 
 from scripts.cbz_processor import compress_cbz
 from scripts.utils import get_directory_from_env_or_prompt, make_summary_dict, print_result
@@ -57,7 +57,9 @@ def convert_pdf_to_image_directory(pdf_path):
     os.makedirs(output_directory, exist_ok=True)
     clear_output_directory(output_directory, pdf_name)
 
-    for index, image in enumerate(convert_from_path(pdf_path), start=1):
+    page_count = int(pdfinfo_from_path(pdf_path)["Pages"])
+    for index in range(1, page_count + 1):
+        image = convert_from_path(pdf_path, first_page=index, last_page=index)[0]
         output_filename = f"{pdf_name}_{index:03}.png"
         output_path = os.path.join(output_directory, output_filename)
         image.save(output_path, "PNG")
