@@ -22,6 +22,9 @@ def test_convert_pdf_to_image_directory_uses_expected_filenames(monkeypatch, tmp
     """Pages should be saved as <pdf_name>_001.png style names."""
     pdf_path = tmp_path / "Book Name.pdf"
     pdf_path.write_bytes(b"%PDF-1.4")
+    stale_file = tmp_path / "Book Name" / "Book Name_999.png"
+    stale_file.parent.mkdir()
+    stale_file.write_bytes(b"stale")
 
     monkeypatch.setattr(
         pdf_to_cbz,
@@ -33,6 +36,8 @@ def test_convert_pdf_to_image_directory_uses_expected_filenames(monkeypatch, tmp
 
     assert (tmp_path / "Book Name" / "Book Name_001.png").exists()
     assert (tmp_path / "Book Name" / "Book Name_002.png").exists()
+    assert not stale_file.exists()
+    assert pdf_path.exists()
     assert output_directory == str(tmp_path / "Book Name")
 
 

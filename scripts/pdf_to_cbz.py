@@ -17,6 +17,7 @@ Environment Variables:
 """
 
 import os
+import shutil
 import zipfile
 
 from dotenv import load_dotenv
@@ -38,6 +39,12 @@ def convert_pdf_to_image_directory(pdf_path):
     pdf_name = os.path.splitext(os.path.basename(pdf_path))[0]
     output_directory = os.path.join(directory, pdf_name)
     os.makedirs(output_directory, exist_ok=True)
+    for entry_name in os.listdir(output_directory):
+        entry_path = os.path.join(output_directory, entry_name)
+        if os.path.isdir(entry_path):
+            shutil.rmtree(entry_path)
+        else:
+            os.remove(entry_path)
 
     for index, image in enumerate(convert_from_path(pdf_path), start=1):
         output_filename = f"{pdf_name}_{index:03}.png"
