@@ -145,18 +145,17 @@ def test_clear_output_directory_validates_expected_name(tmp_path):
         pdf_to_cbz.clear_output_directory(str(output_directory), "other_name")
 
 
-def test_clear_output_directory_raises_runtime_error_on_delete_failure(monkeypatch, tmp_path):
+def test_clear_output_directory_handles_delete_failure(monkeypatch, tmp_path):
     """Cleanup should raise RuntimeError when deleting generated files fails."""
     output_directory = tmp_path / "comic"
     output_directory.mkdir()
     generated_file = output_directory / "comic_001.png"
     generated_file.write_bytes(b"image")
 
-    monkeypatch.setattr(
-        pdf_to_cbz.os,
-        "remove",
-        lambda _path: (_ for _ in ()).throw(OSError("cannot delete")),
-    )
+    def fake_remove(_path):
+        raise OSError("cannot delete")
+
+    monkeypatch.setattr(pdf_to_cbz.os, "remove", fake_remove)
 
     with pytest.raises(RuntimeError):
         pdf_to_cbz.clear_output_directory(str(output_directory), "comic")
