@@ -12,10 +12,12 @@ Scripts are fully tested, linted, and compatible with both direct execution and 
 - **scripts/mp3_metadata_stripper.py**: Recursively removes metadata from mp3 and m4a files in a directory and its subdirectories.
 - **scripts/cbz_processor.py**: Compresses and optimizes CBZ files in a directory (see script for details).
 - **scripts/cbz_clean_up.py**: Recursively deletes CBZ backup files ending in `_original.cbz`.
+- **scripts/pdf_to_cbz.py**: Recursively converts PDF files into CBZ archives, then optimizes them with the CBZ processor.
 
 ## Requirements
 
 - Python 3.12+
+- Poppler (required by `pdf2image` for `scripts/pdf_to_cbz.py`; provides `pdftoppm`/`pdftocairo`)
 
 ## Getting Started
 
@@ -33,6 +35,7 @@ python -m scripts.trim_filenames
 python -m scripts.mp3_metadata_stripper
 python -m scripts.cbz_processor
 python -m scripts.cbz_clean_up
+python -m scripts.pdf_to_cbz
 ```
 
 ## Linting & Code Quality
