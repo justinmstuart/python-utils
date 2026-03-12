@@ -17,6 +17,7 @@ Scripts are fully tested, linted, and compatible with both direct execution and 
 ## Requirements
 
 - Python 3.12+
+- Poppler (required by `pdf2image` for `scripts/pdf_to_cbz.py`; provides `pdftoppm`/`pdftocairo`)
 
 ## Getting Started
 
