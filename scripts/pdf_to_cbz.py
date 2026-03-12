@@ -61,14 +61,18 @@ def convert_pdf_to_image_directory(pdf_path):
     clear_output_directory(output_directory, pdf_name)
 
     page_count = int(pdfinfo_from_path(pdf_path)["Pages"])
-    for index in range(1, page_count + 1):
-        image = convert_from_path(pdf_path, first_page=index, last_page=index)[0]
-        try:
-            output_filename = f"{pdf_name}_{index:03}.png"
-            output_path = os.path.join(output_directory, output_filename)
-            image.save(output_path, "PNG")
-        finally:
-            image.close()
+    batch_size = 25
+    for start_page in range(1, page_count + 1, batch_size):
+        end_page = min(start_page + batch_size - 1, page_count)
+        images = convert_from_path(pdf_path, first_page=start_page, last_page=end_page)
+        for offset, image in enumerate(images):
+            page_index = start_page + offset
+            try:
+                output_filename = f"{pdf_name}_{page_index:03}.png"
+                output_path = os.path.join(output_directory, output_filename)
+                image.save(output_path, "PNG")
+            finally:
+                image.close()
 
     return output_directory
 

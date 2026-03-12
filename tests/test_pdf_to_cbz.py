@@ -12,11 +12,16 @@ class DummyImage:
 
     def __init__(self, marker):
         self.marker = marker
+        self.closed = False
 
     def save(self, output_path, _format):
         """Write marker bytes to the output path."""
         with open(output_path, "wb") as file:
             file.write(self.marker)
+
+    def close(self):
+        """Close image resource."""
+        self.closed = True
 
 
 def test_convert_pdf_to_image_directory_uses_expected_filenames(monkeypatch, tmp_path):
@@ -32,7 +37,10 @@ def test_convert_pdf_to_image_directory_uses_expected_filenames(monkeypatch, tmp
 
     def fake_convert(_pdf_path, first_page, last_page):
         convert_calls.append((first_page, last_page))
-        return [DummyImage(f"page-{first_page}".encode())]
+        return [
+            DummyImage(f"page-{page_number}".encode())
+            for page_number in range(first_page, last_page + 1)
+        ]
 
     monkeypatch.setattr(pdf_to_cbz, "convert_from_path", fake_convert)
 
@@ -40,7 +48,7 @@ def test_convert_pdf_to_image_directory_uses_expected_filenames(monkeypatch, tmp
 
     assert (tmp_path / "Book Name" / "Book Name_001.png").exists()
     assert (tmp_path / "Book Name" / "Book Name_002.png").exists()
-    assert convert_calls == [(1, 1), (2, 2)]
+    assert convert_calls == [(1, 2)]
     assert not stale_file.exists()
     assert pdf_path.exists()
     assert output_directory == str(tmp_path / "Book Name")
