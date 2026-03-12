@@ -17,7 +17,7 @@ Environment Variables:
 """
 
 import os
-import shutil
+import re
 import zipfile
 
 from dotenv import load_dotenv
@@ -38,13 +38,16 @@ def clear_output_directory(output_directory, expected_directory_name):
     if os.path.basename(output_directory) != expected_directory_name:
         raise ValueError(f"Refusing to clean unexpected directory: {output_directory}")
 
+    generated_image_pattern = re.compile(
+        rf"^{re.escape(expected_directory_name)}_\d{{3,}}\.png$"
+    )
+
     try:
         for entry_name in os.listdir(output_directory):
+            if not generated_image_pattern.fullmatch(entry_name):
+                continue
             entry_path = os.path.join(output_directory, entry_name)
-            if os.path.isdir(entry_path):
-                shutil.rmtree(entry_path)
-            else:
-                os.remove(entry_path)
+            os.remove(entry_path)
     except OSError as error:
         raise RuntimeError(f"Failed to clean output directory: {output_directory}") from error
 

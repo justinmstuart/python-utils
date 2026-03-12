@@ -163,3 +163,24 @@ def test_clear_output_directory_handles_delete_failure(monkeypatch, tmp_path):
 
     with pytest.raises(RuntimeError):
         pdf_to_cbz.clear_output_directory(str(output_directory), "comic")
+
+
+def test_clear_output_directory_preserves_unrelated_content(tmp_path):
+    """Cleanup should delete only generated page images."""
+    output_directory = tmp_path / "comic"
+    output_directory.mkdir()
+    generated_file = output_directory / "comic_001.png"
+    generated_file.write_bytes(b"generated")
+    unrelated_file = output_directory / "cover.png"
+    unrelated_file.write_bytes(b"cover")
+    unrelated_directory = output_directory / "notes"
+    unrelated_directory.mkdir()
+    unrelated_nested_file = unrelated_directory / "readme.txt"
+    unrelated_nested_file.write_text("keep me")
+
+    pdf_to_cbz.clear_output_directory(str(output_directory), "comic")
+
+    assert not generated_file.exists()
+    assert unrelated_file.exists()
+    assert unrelated_directory.exists()
+    assert unrelated_nested_file.exists()
