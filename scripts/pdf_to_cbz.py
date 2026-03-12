@@ -63,9 +63,12 @@ def convert_pdf_to_image_directory(pdf_path):
     page_count = int(pdfinfo_from_path(pdf_path)["Pages"])
     for index in range(1, page_count + 1):
         image = convert_from_path(pdf_path, first_page=index, last_page=index)[0]
-        output_filename = f"{pdf_name}_{index:03}.png"
-        output_path = os.path.join(output_directory, output_filename)
-        image.save(output_path, "PNG")
+        try:
+            output_filename = f"{pdf_name}_{index:03}.png"
+            output_path = os.path.join(output_directory, output_filename)
+            image.save(output_path, "PNG")
+        finally:
+            image.close()
 
     return output_directory
 
