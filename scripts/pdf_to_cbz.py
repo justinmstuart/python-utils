@@ -96,7 +96,7 @@ def rename_zip_to_cbz(zip_path):
     return cbz_path
 
 
-def convert_pdf_to_cbz(pdf_path, quality=80, max_height=1024):
+def convert_pdf_to_cbz(pdf_path, quality=100, max_height=1024):
     """Convert a PDF to CBZ and run CBZ optimization."""
     image_directory = convert_pdf_to_image_directory(pdf_path)
     zip_path = zip_directory(image_directory)
@@ -105,7 +105,7 @@ def convert_pdf_to_cbz(pdf_path, quality=80, max_height=1024):
     return cbz_path
 
 
-def process_pdf_files(directory, quality=80, max_height=1024):
+def process_pdf_files(directory, quality=100, max_height=1024):
     """Recursively process PDF files in a directory and return summary stats."""
     success_count = 0
     skipped_count = 0
