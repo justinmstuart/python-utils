@@ -1,5 +1,6 @@
 Pillow
 pdf2image
+pdfplumber
 coverage
 mutagen
 pylint
